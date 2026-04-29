@@ -1,6 +1,7 @@
 import { pool } from "../../../db.config.js";
 import { ResultSetHeader, RowDataPacket } from "mysql2";
 
+// 가게 존재 여부 확인
 export const findStoreById = async (storeId: number) => {
   const [rows] = await pool.query<RowDataPacket[]>(
     "SELECT * FROM store WHERE id = ?",
@@ -10,6 +11,7 @@ export const findStoreById = async (storeId: number) => {
   return rows.length > 0;
 };
 
+// 리뷰 생성
 export const createReview = async (
   userId: number,
   storeId: number,

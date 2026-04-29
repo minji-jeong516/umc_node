@@ -8,6 +8,7 @@ export interface UserSignUpRequest {
   detailAddress?: string;
   phoneNumber: string;
   preferences: number[];
+  password: string; 
 }
 
 // 2. 요청받은 데이터를 우리 시스템에 맞는 데이터로 변환해주는 함수입니다. 
@@ -22,6 +23,7 @@ export const bodyToUser = (body: UserSignUpRequest) => {
     detailAddress: body.detailAddress || "", //선택 
     phoneNumber: body.phoneNumber,//필수
     preferences: body.preferences,// 필수 
+    password: body.password,
   };
 };
 export const responseFromUser = ({ user, preferences }: any) => {
