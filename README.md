@@ -1,22 +1,22 @@
-# 🍒 5주차 API 미션
+#  5주차 API 미션
 
-## ✅ 미션 1
+## 미션 1
 
 - 가게에 리뷰 추가 API
 - 미션 도전하기 API
 - 특정 지역에 가게 추가 API
 
-## 🔐 미션 3
+## 미션 3
 
 - bcrypt를 이용한 비밀번호 해싱 적용
 
-## 🧩 구조
+## 구조
 
 - Controller → Service → Repository 구조 적용
 
 ---
 
-## 📸 API 테스트
+## API 테스트
 
 ### 1. 가게에 리뷰 추가 API
 <img width="990" height="1443" alt="스크린샷 2026-04-29 215255" src="https://github.com/user-attachments/assets/88829d21-8d7f-4091-bea8-8ed17941ab40" />
