@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import { StatusCodes } from "http-status-codes";
-import { bodyToStore } from "../dtos/store.dto.js";
+import { bodyToStore, CreateStoreRequest } from "../dtos/store.dto.js";
 import { addStore } from "../services/store.service.js";
 
 // 가게 추가 API 핸들러
@@ -21,7 +21,8 @@ export const handleAddStore = async (
     }
 
     // 요청 body → 가게 데이터 변환
-    const storeData = bodyToStore(req.body);
+    
+    const storeData = bodyToStore(req.body as CreateStoreRequest);
 
     // 가게 생성 로직 실행
     const result = await addStore(regionId, storeData);

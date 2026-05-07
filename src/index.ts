@@ -1,12 +1,12 @@
 // 1. 환경 변수 설정
-dotenv.config();
 import dotenv from "dotenv";
+dotenv.config();
 import express, { Express, Request, Response } from "express";
 import cors from "cors";
 import { handleUserSignUp} from "./modules/users/controllers/user.controller.js";
-import { handleAddReview } from "./modules/reviews/controllers/review.controller.js";
-import { handleChallengeMission } from "./modules/missions/controllers/mission.controller.js";
-import { handleAddStore } from "./modules/stores/controllers/store.controller.js";
+import { handleAddReview, handleListStoreReviews,handleListMyReviews,} from "./modules/reviews/controllers/review.controller.js";
+import { handleChallengeMission, handleListMyChallengingMissions, handleCompleteMission,} from "./modules/missions/controllers/mission.controller.js";
+import { handleAddStore} from "./modules/stores/controllers/store.controller.js";
 
 const app: Express = express();
 const port = process.env.PORT || 3000;
@@ -21,11 +21,15 @@ app.use(express.urlencoded({ extended: false })); // 단순 객체 문자열 형
 app.get("/", (req: Request, res: Response) => {
   res.send("Hello World! This is TypeScript Server!");
 });
-
+app.get("/api/v1/stores/:storeId/reviews", handleListStoreReviews);
+app.get("/api/v1/users/me/reviews", handleListMyReviews);
+app.get("/api/v1/users/me/missions/challenging",handleListMyChallengingMissions);
 app.post("/api/v1/users/signup", handleUserSignUp);
 app.post("/api/v1/stores/:storeId/reviews", handleAddReview);
 app.post("/api/v1/missions/:missionId/challenge", handleChallengeMission);
 app.post("/api/v1/regions/:regionId/stores", handleAddStore);
+app.patch(
+  "/api/v1/users/me/missions/:missionId/complete",handleCompleteMission);
 // 4. 서버 시작
 app.listen(port, () => {
   console.log(`[server]: Server is running at <http://localhost>:${port}`);
