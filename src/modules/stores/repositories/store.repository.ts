@@ -1,14 +1,14 @@
-import { pool } from "../../../db.config.js";
-import { ResultSetHeader, RowDataPacket } from "mysql2";
+import { prisma } from "../../../db.config.js";
 
 // 지역 존재 여부 확인
 export const findRegionById = async (regionId: number) => {
-  const [rows] = await pool.query<RowDataPacket[]>(
-    "SELECT * FROM region WHERE id = ?",
-    [regionId]
-  );
+  const region = await prisma.region.findUnique({
+    where: {
+      id: regionId,
+    },
+  });
 
-  return rows.length > 0;
+  return region !== null;
 };
 
 // 가게 생성
@@ -17,11 +17,13 @@ export const createStore = async (
   name: string,
   address: string
 ) => {
-  const [result] = await pool.query<ResultSetHeader>(
-    `INSERT INTO store (region_id, name, address)
-     VALUES (?, ?, ?)`,
-    [regionId, name, address]
-  );
+  const store = await prisma.store.create({
+    data: {
+      regionId,
+      name,
+      address,
+    },
+  });
 
-  return result.insertId;
+  return store.id;
 };
