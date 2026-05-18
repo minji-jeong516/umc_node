@@ -1,40 +1,77 @@
-import { Request, Response, NextFunction } from "express";
-import { StatusCodes } from "http-status-codes";
-import { bodyToReview } from "../dtos/review.dto.js";
-import { addReview } from "../services/review.service.js";
+import {
+  Body,
+  Controller,
+  Get,
+  Path,
+  Post,
+  Query,
+  Route,
+  Tags,
+} from "tsoa";
 
-// 리뷰 추가 API 핸들러
-export const handleAddReview = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
-    // storeId 추출 및 숫자 변환
-    const storeId = Number(req.params.storeId);
+import { CreateReviewRequest } from "../dtos/review.dto.js";
 
-    // storeId 유효성 검사
-    if (Number.isNaN(storeId)) {
-      return res.status(StatusCodes.BAD_REQUEST).json({
-        message: "storeId가 올바르지 않습니다.",
-      });
-    }
+import {
+  addReview,
+  listStoreReviews,
+  listMyReviews,
+} from "../services/review.service.js";
 
-    // 임시 사용자 ID
+import {
+  ApiResponse,
+  success,
+} from "../../../common/responses/response.js";
+
+@Route("reviews")
+@Tags("Reviews")
+export class ReviewController extends Controller {
+  // 내가 작성한 리뷰 목록 조회
+  @Get("me")
+  public async handleListMyReviews(
+    @Query() cursor?: number
+  ): Promise<ApiResponse<any>> {
     const userId = 1;
 
-    // 요청 body → 리뷰 데이터 변환
-    const reviewData = bodyToReview(req.body);
+    const result = await listMyReviews(
+      userId,
+      cursor ?? 0
+    );
 
-    // 리뷰 생성 로직 실행
-    const result = await addReview(storeId, userId, reviewData);
-
-    // 결과 반환
-    return res.status(StatusCodes.OK).json({
-      result,
-    });
-  } catch (err) {
-    // 에러 처리
-    next(err);
+    return success(result);
   }
-};
+}
+
+@Route("stores")
+@Tags("Reviews")
+export class StoreReviewController extends Controller {
+  // 가게에 리뷰 추가
+  @Post("{storeId}/reviews")
+  public async handleAddReview(
+    @Path() storeId: number,
+    @Body() body: CreateReviewRequest
+  ): Promise<ApiResponse<any>> {
+    const userId = 1;
+
+    const result = await addReview(
+      storeId,
+      userId,
+      body
+    );
+
+    return success(result);
+  }
+
+  // 가게 리뷰 목록 조회
+  @Get("{storeId}/reviews")
+  public async handleListStoreReviews(
+    @Path() storeId: number,
+    @Query() cursor?: number
+  ): Promise<ApiResponse<any>> {
+    const result = await listStoreReviews(
+      storeId,
+      cursor ?? 0
+    );
+
+    return success(result);
+  }
+}
