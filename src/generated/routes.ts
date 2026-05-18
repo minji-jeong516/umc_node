@@ -20,12 +20,22 @@ import type { Request as ExRequest, Response as ExResponse, RequestHandler, Rout
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 
 const models: TsoaRoute.Models = {
-    "UserSignUpResponse": {
+    "ApiResponse_any_": {
         "dataType": "refObject",
         "properties": {
-            "email": {"dataType":"string","required":true},
-            "name": {"dataType":"string","required":true},
-            "preferCategory": {"dataType":"array","array":{"dataType":"string"},"required":true},
+            "resultType": {"dataType":"enum","enums":["SUCCESS"],"required":true},
+            "error": {"dataType":"enum","enums":[null],"required":true},
+            "data": {"dataType":"any","required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ApiResponse_null_": {
+        "dataType": "refObject",
+        "properties": {
+            "resultType": {"dataType":"enum","enums":["SUCCESS"],"required":true},
+            "error": {"dataType":"enum","enums":[null],"required":true},
+            "data": {"dataType":"enum","enums":[null],"required":true},
         },
         "additionalProperties": false,
     },
@@ -60,15 +70,6 @@ const models: TsoaRoute.Models = {
         "properties": {
             "content": {"dataType":"string","required":true},
             "score": {"dataType":"double","required":true},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "MyChallengingMissionsResponse": {
-        "dataType": "refObject",
-        "properties": {
-            "data": {"dataType":"array","array":{"dataType":"any"},"required":true},
-            "pagination": {"dataType":"nestedObjectLiteral","nestedProperties":{"cursor":{"dataType":"union","subSchemas":[{"dataType":"double"},{"dataType":"enum","enums":[null]}],"required":true}},"required":true},
         },
         "additionalProperties": false,
     },

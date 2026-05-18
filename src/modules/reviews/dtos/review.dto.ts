@@ -1,5 +1,7 @@
 export interface CreateReviewRequest {
+  /*리뷰 내용*/
   content: string;
+  /*리뷰 점수*/
   score: number;
 }
 

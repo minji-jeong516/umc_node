@@ -7,25 +7,60 @@
 		"requestBodies": {},
 		"responses": {},
 		"schemas": {
-			"UserSignUpResponse": {
+			"ApiResponse_any_": {
 				"properties": {
-					"email": {
-						"type": "string"
+					"resultType": {
+						"type": "string",
+						"enum": [
+							"SUCCESS"
+						],
+						"nullable": false
 					},
-					"name": {
-						"type": "string"
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
 					},
-					"preferCategory": {
-						"items": {
-							"type": "string"
-						},
-						"type": "array"
+					"data": {}
+				},
+				"required": [
+					"resultType",
+					"error",
+					"data"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ApiResponse_null_": {
+				"properties": {
+					"resultType": {
+						"type": "string",
+						"enum": [
+							"SUCCESS"
+						],
+						"nullable": false
+					},
+					"error": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
+					},
+					"data": {
+						"type": "number",
+						"enum": [
+							null
+						],
+						"nullable": true
 					}
 				},
 				"required": [
-					"email",
-					"name",
-					"preferCategory"
+					"resultType",
+					"error",
+					"data"
 				],
 				"type": "object",
 				"additionalProperties": false
@@ -33,35 +68,44 @@
 			"UserSignUpRequest": {
 				"properties": {
 					"email": {
-						"type": "string"
+						"type": "string",
+						"description": "유저 이메일"
 					},
 					"name": {
-						"type": "string"
+						"type": "string",
+						"description": "유저 이름"
 					},
 					"gender": {
-						"type": "string"
+						"type": "string",
+						"description": "성별"
 					},
 					"birth": {
-						"type": "string"
+						"type": "string",
+						"description": "생년월일"
 					},
 					"address": {
-						"type": "string"
+						"type": "string",
+						"description": "주소"
 					},
 					"detailAddress": {
-						"type": "string"
+						"type": "string",
+						"description": "상세 주소"
 					},
 					"phoneNumber": {
-						"type": "string"
+						"type": "string",
+						"description": "전화번호"
 					},
 					"preferences": {
 						"items": {
 							"type": "number",
 							"format": "double"
 						},
-						"type": "array"
+						"type": "array",
+						"description": "선호 음식 카테고리 ID 배열"
 					},
 					"password": {
-						"type": "string"
+						"type": "string",
+						"description": "비밀번호"
 					}
 				},
 				"required": [
@@ -79,10 +123,12 @@
 			"CreateStoreRequest": {
 				"properties": {
 					"name": {
-						"type": "string"
+						"type": "string",
+						"description": "가게 이름"
 					},
 					"address": {
-						"type": "string"
+						"type": "string",
+						"description": "가게 주소"
 					}
 				},
 				"required": [
@@ -105,33 +151,6 @@
 				"required": [
 					"content",
 					"score"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"MyChallengingMissionsResponse": {
-				"properties": {
-					"data": {
-						"items": {},
-						"type": "array"
-					},
-					"pagination": {
-						"properties": {
-							"cursor": {
-								"type": "number",
-								"format": "double",
-								"nullable": true
-							}
-						},
-						"required": [
-							"cursor"
-						],
-						"type": "object"
-					}
-				},
-				"required": [
-					"data",
-					"pagination"
 				],
 				"type": "object",
 				"additionalProperties": false
@@ -158,12 +177,24 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/UserSignUpResponse"
+									"$ref": "#/components/schemas/ApiResponse_any_"
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "이미 존재하는 이메일 또는 잘못된 요청",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiResponse_null_"
 								}
 							}
 						}
 					}
 				},
+				"description": "회원가입 API",
+				"summary": "사용자의 회원가입을 처리합니다.",
 				"tags": [
 					"Users"
 				],
@@ -196,6 +227,8 @@
 						}
 					}
 				},
+				"description": "게스트 페이지 조회 API",
+				"summary": "로그인 없이 접근 가능한 게스트 페이지를 반환합니다.",
 				"tags": [
 					"Users"
 				],
@@ -218,6 +251,8 @@
 						}
 					}
 				},
+				"description": "로그인 페이지 조회 API",
+				"summary": "로그인이 필요한 페이지에서 인증 실패 시 이동할 로그인 페이지를 반환합니다.",
 				"tags": [
 					"Users"
 				],
@@ -238,8 +273,20 @@
 								}
 							}
 						}
+					},
+					"401": {
+						"description": "로그인이 필요합니다",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string"
+								}
+							}
+						}
 					}
 				},
+				"description": "마이페이지 조회 API",
+				"summary": "로그인 쿠키가 있는 사용자만 마이페이지를 조회할 수 있습니다.",
 				"tags": [
 					"Users"
 				],
@@ -262,6 +309,8 @@
 						}
 					}
 				},
+				"description": "로그인 쿠키 생성 API",
+				"summary": "테스트용 로그인 쿠키를 생성합니다.",
 				"tags": [
 					"Users"
 				],
@@ -284,6 +333,8 @@
 						}
 					}
 				},
+				"description": "로그아웃 API",
+				"summary": "로그인 쿠키를 삭제합니다.",
 				"tags": [
 					"Users"
 				],
@@ -300,40 +351,41 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"properties": {
-										"address": {
-											"type": "string"
-										},
-										"name": {
-											"type": "string"
-										},
-										"regionId": {
-											"type": "number",
-											"format": "double"
-										},
-										"storeId": {
-											"type": "number",
-											"format": "double"
-										}
-									},
-									"required": [
-										"address",
-										"name",
-										"regionId",
-										"storeId"
-									],
-									"type": "object"
+									"$ref": "#/components/schemas/ApiResponse_any_"
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "잘못된 요청",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiResponse_null_"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "존재하지 않는 지역",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiResponse_null_"
 								}
 							}
 						}
 					}
 				},
+				"description": "가게 추가 API",
+				"summary": "특정 지역에 새로운 가게를 추가합니다.",
 				"tags": [
 					"Stores"
 				],
 				"security": [],
 				"parameters": [
 					{
+						"description": "가게를 추가할 지역 ID",
 						"in": "path",
 						"name": "regionId",
 						"required": true,
@@ -364,53 +416,21 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"properties": {
-										"pagination": {
-											"properties": {
-												"cursor": {}
-											},
-											"required": [
-												"cursor"
-											],
-											"type": "object"
-										},
-										"data": {
-											"items": {
-												"properties": {
-													"score": {},
-													"content": {},
-													"storeName": {},
-													"storeId": {},
-													"reviewId": {}
-												},
-												"required": [
-													"score",
-													"content",
-													"storeName",
-													"storeId",
-													"reviewId"
-												],
-												"type": "object"
-											},
-											"type": "array"
-										}
-									},
-									"required": [
-										"pagination",
-										"data"
-									],
-									"type": "object"
+									"$ref": "#/components/schemas/ApiResponse_any_"
 								}
 							}
 						}
 					}
 				},
+				"description": "내가 작성한 리뷰 목록 조회 API",
+				"summary": "현재 로그인한 사용자가 작성한 리뷰 목록을 조회합니다.",
 				"tags": [
 					"Reviews"
 				],
 				"security": [],
 				"parameters": [
 					{
+						"description": "다음 페이지 조회를 위한 커서 값",
 						"in": "query",
 						"name": "cursor",
 						"required": false,
@@ -431,41 +451,41 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"properties": {
-										"score": {
-											"type": "number",
-											"format": "double"
-										},
-										"content": {
-											"type": "string"
-										},
-										"storeId": {
-											"type": "number",
-											"format": "double"
-										},
-										"reviewId": {
-											"type": "number",
-											"format": "double"
-										}
-									},
-									"required": [
-										"score",
-										"content",
-										"storeId",
-										"reviewId"
-									],
-									"type": "object"
+									"$ref": "#/components/schemas/ApiResponse_any_"
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "잘못된 리뷰 요청",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiResponse_null_"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "존재하지 않는 가게",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiResponse_null_"
 								}
 							}
 						}
 					}
 				},
+				"description": "가게에 리뷰 추가 API",
+				"summary": "특정 가게에 리뷰를 작성합니다.",
 				"tags": [
 					"Reviews"
 				],
 				"security": [],
 				"parameters": [
 					{
+						"description": "리뷰를 작성할 가게 ID",
 						"in": "path",
 						"name": "storeId",
 						"required": true,
@@ -494,57 +514,31 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"properties": {
-										"pagination": {
-											"properties": {
-												"cursor": {}
-											},
-											"required": [
-												"cursor"
-											],
-											"type": "object"
-										},
-										"data": {
-											"items": {
-												"properties": {
-													"store": {},
-													"user": {},
-													"storeId": {},
-													"userId": {},
-													"score": {},
-													"content": {},
-													"id": {}
-												},
-												"required": [
-													"store",
-													"user",
-													"storeId",
-													"userId",
-													"score",
-													"content",
-													"id"
-												],
-												"type": "object"
-											},
-											"type": "array"
-										}
-									},
-									"required": [
-										"pagination",
-										"data"
-									],
-									"type": "object"
+									"$ref": "#/components/schemas/ApiResponse_any_"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "존재하지 않는 가게",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiResponse_null_"
 								}
 							}
 						}
 					}
 				},
+				"description": "가게 리뷰 목록 조회 API",
+				"summary": "특정 가게에 작성된 리뷰 목록을 조회합니다.",
 				"tags": [
 					"Reviews"
 				],
 				"security": [],
 				"parameters": [
 					{
+						"description": "리뷰를 조회할 가게 ID",
 						"in": "path",
 						"name": "storeId",
 						"required": true,
@@ -554,6 +548,7 @@
 						}
 					},
 					{
+						"description": "다음 페이지 조회를 위한 커서 값",
 						"in": "query",
 						"name": "cursor",
 						"required": false,
@@ -574,36 +569,41 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"properties": {
-										"status": {
-											"type": "string"
-										},
-										"missionId": {
-											"type": "number",
-											"format": "double"
-										},
-										"userMissionId": {
-											"type": "number",
-											"format": "double"
-										}
-									},
-									"required": [
-										"status",
-										"missionId",
-										"userMissionId"
-									],
-									"type": "object"
+									"$ref": "#/components/schemas/ApiResponse_any_"
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "이미 도전 중인 미션",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiResponse_null_"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "존재하지 않는 미션",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiResponse_null_"
 								}
 							}
 						}
 					}
 				},
+				"description": "미션 도전 API",
+				"summary": "특정 미션을 도전 중인 미션으로 추가합니다.",
 				"tags": [
 					"Missions"
 				],
 				"security": [],
 				"parameters": [
 					{
+						"description": "도전할 미션 ID",
 						"in": "path",
 						"name": "missionId",
 						"required": true,
@@ -624,18 +624,21 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/MyChallengingMissionsResponse"
+									"$ref": "#/components/schemas/ApiResponse_any_"
 								}
 							}
 						}
 					}
 				},
+				"description": "내가 도전 중인 미션 목록 조회 API",
+				"summary": "현재 사용자가 도전 중인 미션 목록을 조회합니다.",
 				"tags": [
 					"Missions"
 				],
 				"security": [],
 				"parameters": [
 					{
+						"description": "다음 페이지 조회를 위한 커서 값",
 						"in": "query",
 						"name": "cursor",
 						"required": false,
@@ -656,31 +659,41 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"properties": {
-										"status": {
-											"type": "string"
-										},
-										"missionId": {
-											"type": "number",
-											"format": "double"
-										}
-									},
-									"required": [
-										"status",
-										"missionId"
-									],
-									"type": "object"
+									"$ref": "#/components/schemas/ApiResponse_any_"
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "완료 처리할 수 없는 미션",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiResponse_null_"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "도전 중인 미션을 찾을 수 없음",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiResponse_null_"
 								}
 							}
 						}
 					}
 				},
+				"description": "미션 완료 처리 API",
+				"summary": "도전 중인 미션을 완료 상태로 변경합니다.",
 				"tags": [
 					"Missions"
 				],
 				"security": [],
 				"parameters": [
 					{
+						"description": "완료 처리할 미션 ID",
 						"in": "path",
 						"name": "missionId",
 						"required": true,
@@ -695,7 +708,7 @@
 	},
 	"servers": [
 		{
-			"url": "/"
+			"url": "/api/v1"
 		}
 	]
 }
