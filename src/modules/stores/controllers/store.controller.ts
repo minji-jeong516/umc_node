@@ -1,37 +1,41 @@
-import { Request, Response, NextFunction } from "express";
-import { StatusCodes } from "http-status-codes";
-import { bodyToStore } from "../dtos/store.dto.js";
+import {
+  Body,
+  Controller,
+  Path,
+  Post,
+  Route,
+  Tags,
+  Response,
+} from "tsoa";
+
+import { CreateStoreRequest } from "../dtos/store.dto.js";
+
 import { addStore } from "../services/store.service.js";
 
-// 가게 추가 API 핸들러
-export const handleAddStore = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
-    // regionId 추출 및 숫자 변환
-    const regionId = Number(req.params.regionId);
+import {
+  ApiResponse,
+  success,
+} from "../../../common/responses/response.js";
 
-    // regionId 유효성 검사
-    if (Number.isNaN(regionId)) {
-      return res.status(StatusCodes.BAD_REQUEST).json({
-        message: "regionId가 올바르지 않습니다.",
-      });
-    }
+@Route("regions")
+@Tags("Stores")
+export class StoreController extends Controller {
+  /**
+   * 가게 추가 API
+   * @summary 특정 지역에 새로운 가게를 추가합니다.
+   */
+  @Post("{regionId}/stores")
+  @Response<ApiResponse<any>>(200, "가게 추가 성공")
+  @Response<ApiResponse<null>>(404, "존재하지 않는 지역")
+  @Response<ApiResponse<null>>(400, "잘못된 요청")
+  public async handleAddStore(
+    /** 가게를 추가할 지역 ID */
+    @Path() regionId: number,
 
-    // 요청 body → 가게 데이터 변환
-    const storeData = bodyToStore(req.body);
+    @Body() body: CreateStoreRequest
+  ): Promise<ApiResponse<any>> {
+    const result = await addStore(regionId, body);
 
-    // 가게 생성 로직 실행
-    const result = await addStore(regionId, storeData);
-
-    // 결과 반환
-    return res.status(StatusCodes.OK).json({
-      result,
-    });
-  } catch (err) {
-    // 에러 처리
-    next(err);
+    return success(result);
   }
-};
+}

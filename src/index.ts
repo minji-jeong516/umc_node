@@ -1,32 +1,110 @@
 // 1. 환경 변수 설정
-dotenv.config();
+import cookieParser from "cookie-parser";
+import morgan from "morgan";
 import dotenv from "dotenv";
-import express, { Express, Request, Response } from "express";
+dotenv.config();
+
+import express, {
+  Express,
+  Request,
+  Response,
+  NextFunction,
+} from "express";
+
 import cors from "cors";
-import { handleUserSignUp} from "./modules/users/controllers/user.controller.js";
-import { handleAddReview } from "./modules/reviews/controllers/review.controller.js";
-import { handleChallengeMission } from "./modules/missions/controllers/mission.controller.js";
-import { handleAddStore } from "./modules/stores/controllers/store.controller.js";
+import fs from "fs";
+import path from "path";
+import swaggerUi from "swagger-ui-express";
+
+import { AppError } from "./common/errors/app.error.js";
+import { RegisterRoutes } from "./generated/routes.js";
 
 const app: Express = express();
 const port = process.env.PORT || 3000;
 
+// 공통 에러 응답 함수
+app.use((req: Request, res: Response, next: NextFunction) => {
+  (res as any).error = function ({
+    errorCode = null,
+    message = null,
+    data = null,
+  }) {
+    return this.json({
+      resultType: "FAILED",
+      error: {
+        errorCode,
+        message,
+        data,
+      },
+      data: null,
+    });
+  };
+
+  next();
+});
+
 // 2. 미들웨어 설정
-app.use(cors());            // cors 방식 허용                 
-app.use(express.static('public'));    // 정적 파일 접근      
-app.use(express.json());              // request의 본문을 json으로 해석할 수 있도록 함(JSON 형태의 요청 body를 파싱하기 위함)     
-app.use(express.urlencoded({ extended: false })); // 단순 객체 문자열 형태로 본문 데이터 해석
+app.use(cors());
+app.use(morgan("dev"));
+app.use(express.static("public"));
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
+app.use(cookieParser());
 
 // 3. 기본 라우트
 app.get("/", (req: Request, res: Response) => {
   res.send("Hello World! This is TypeScript Server!");
 });
 
-app.post("/api/v1/users/signup", handleUserSignUp);
-app.post("/api/v1/stores/:storeId/reviews", handleAddReview);
-app.post("/api/v1/missions/:missionId/challenge", handleChallengeMission);
-app.post("/api/v1/regions/:regionId/stores", handleAddStore);
-// 4. 서버 시작
+// 4. Swagger 설정
+const swaggerFile = JSON.parse(
+  fs.readFileSync(path.resolve("dist/swagger.json"), "utf8")
+);
+
+app.use(
+  "/docs",
+  swaggerUi.serve,
+  swaggerUi.setup(swaggerFile)
+);
+
+// 5. TSOA 라우트 등록
+const router = express.Router();
+
+RegisterRoutes(router);
+
+app.use("/api/v1", router);
+
+console.log("TSOA routes mounted at /api/v1");
+
+// 6. 전역 에러 핸들러
+app.use(
+  (
+    err: AppError,
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
+    console.error(err);
+
+    if (res.headersSent) {
+      return next(err);
+    }
+
+    (res.status(err.statusCode || 500) as any).error({
+      errorCode: err.errorCode || "unknown",
+      message: err.message || String(err),
+      data: err.data || null,
+    });
+  }
+);
+
+// 7. 서버 시작
 app.listen(port, () => {
-  console.log(`[server]: Server is running at <http://localhost>:${port}`);
+  console.log(
+    `[server]: Server is running at http://localhost:${port}`
+  );
+
+  console.log(
+    `[swagger]: Swagger docs available at http://localhost:${port}/docs`
+  );
 });
