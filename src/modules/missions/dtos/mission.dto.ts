@@ -1,12 +1,24 @@
-export interface ChallengeMissionRequest {}
+export interface ChallengeMissionResponse {
+  userMissionId: number;
+  missionId: number;
+  status: string;
+}
 
-export const bodyToChallenge = () => {
-  return {};
-};
+export interface CompleteMissionResponse {
+  missionId: number;
+  status: string;
+}
+
+export interface MyChallengingMissionsResponse {
+  data: any[];
+  pagination: {
+    cursor: number | null;
+  };
+}
 
 export const responseFromMyChallengingMissions = (
   userMissions: any[]
-) => {
+): MyChallengingMissionsResponse => {
   const lastMission = userMissions[userMissions.length - 1];
 
   return {

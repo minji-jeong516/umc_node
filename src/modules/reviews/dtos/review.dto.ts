@@ -3,12 +3,6 @@ export interface CreateReviewRequest {
   score: number;
 }
 
-export const bodyToReview = (body: CreateReviewRequest) => {
-  return {
-    content: body.content,
-    score: body.score,
-  };
-};
 export const responseFromReviews = (reviews: any[]) => {
   const lastReview = reviews[reviews.length - 1];
 

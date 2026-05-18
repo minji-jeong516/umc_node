@@ -1,38 +1,32 @@
-import { Request, Response, NextFunction } from "express";
-import { StatusCodes } from "http-status-codes";
-import { bodyToStore, CreateStoreRequest } from "../dtos/store.dto.js";
+import {
+  Body,
+  Controller,
+  Path,
+  Post,
+  Route,
+  Tags,
+} from "tsoa";
+
+import { CreateStoreRequest } from "../dtos/store.dto.js";
+
 import { addStore } from "../services/store.service.js";
 
-// 가게 추가 API 핸들러
-export const handleAddStore = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
-    // regionId 추출 및 숫자 변환
-    const regionId = Number(req.params.regionId);
+import {
+  ApiResponse,
+  success,
+} from "../../../common/responses/response.js";
 
-    // regionId 유효성 검사
-    if (Number.isNaN(regionId)) {
-      return res.status(StatusCodes.BAD_REQUEST).json({
-        message: "regionId가 올바르지 않습니다.",
-      });
-    }
+@Route("regions")
+@Tags("Stores")
+export class StoreController extends Controller {
+  // 가게 추가 API
+  @Post("{regionId}/stores")
+  public async handleAddStore(
+    @Path() regionId: number,
+    @Body() body: CreateStoreRequest
+  ): Promise<ApiResponse<any>> {
+    const result = await addStore(regionId, body);
 
-    // 요청 body → 가게 데이터 변환
-    
-    const storeData = bodyToStore(req.body as CreateStoreRequest);
-
-    // 가게 생성 로직 실행
-    const result = await addStore(regionId, storeData);
-
-    // 결과 반환
-    return res.status(StatusCodes.OK).json({
-      result,
-    });
-  } catch (err) {
-    // 에러 처리
-    next(err);
+    return success(result);
   }
-};
+}

@@ -1,36 +1,64 @@
 // 1. 환경 변수 설정
+import cookieParser from "cookie-parser";
+import morgan from "morgan";
 import dotenv from "dotenv";
 dotenv.config();
-import express, { Express, Request, Response } from "express";
+import { AppError } from "./common/errors/app.error.js";
+import express, { Express, Request, Response,NextFunction } from "express";
 import cors from "cors";
-import { handleUserSignUp} from "./modules/users/controllers/user.controller.js";
-import { handleAddReview, handleListStoreReviews,handleListMyReviews,} from "./modules/reviews/controllers/review.controller.js";
-import { handleChallengeMission, handleListMyChallengingMissions, handleCompleteMission,} from "./modules/missions/controllers/mission.controller.js";
-import { handleAddStore} from "./modules/stores/controllers/store.controller.js";
+import { RegisterRoutes } from "./generated/routes.js";
 
 const app: Express = express();
 const port = process.env.PORT || 3000;
 
+app.use((req: Request, res: Response, next: NextFunction) => {
+  (res as any).error = function ({ errorCode = null, message = null, data = null }) {
+    return this.json({
+      resultType: "FAILED",
+      error: { errorCode, message, data },
+      data: null,
+    });
+  };
+  next();
+});
 // 2. 미들웨어 설정
-app.use(cors());            // cors 방식 허용                 
-app.use(express.static('public'));    // 정적 파일 접근      
-app.use(express.json());              // request의 본문을 json으로 해석할 수 있도록 함(JSON 형태의 요청 body를 파싱하기 위함)     
-app.use(express.urlencoded({ extended: false })); // 단순 객체 문자열 형태로 본문 데이터 해석
+
+app.use(cors());
+app.use(morgan("dev"));
+app.use(express.static("public"));
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
+app.use(cookieParser());
 
 // 3. 기본 라우트
 app.get("/", (req: Request, res: Response) => {
   res.send("Hello World! This is TypeScript Server!");
 });
-app.get("/api/v1/stores/:storeId/reviews", handleListStoreReviews);
-app.get("/api/v1/users/me/reviews", handleListMyReviews);
-app.get("/api/v1/users/me/missions/challenging",handleListMyChallengingMissions);
-app.post("/api/v1/users/signup", handleUserSignUp);
-app.post("/api/v1/stores/:storeId/reviews", handleAddReview);
-app.post("/api/v1/missions/:missionId/challenge", handleChallengeMission);
-app.post("/api/v1/regions/:regionId/stores", handleAddStore);
-app.patch(
-  "/api/v1/users/me/missions/:missionId/complete",handleCompleteMission);
-// 4. 서버 시작
+
+// 4. TSOA가 자동 생성한 라우트 등록
+const router = express.Router();
+
+RegisterRoutes(router);
+
+app.use("/api/v1", router);
+
+console.log("TSOA routes mounted at /api/v1");
+
+app.use((err: AppError, req: Request, res: Response, next: NextFunction) => {
+  console.error(err);
+
+  if (res.headersSent) {
+    return next(err);
+  }
+
+  (res.status(err.statusCode || 500) as any).error({
+    errorCode: err.errorCode || "unknown",
+    message: err.message || String(err),
+    data: err.data || null,
+  });
+});
+
+// 5. 서버 시작
 app.listen(port, () => {
-  console.log(`[server]: Server is running at <http://localhost>:${port}`);
+  console.log(`[server]: Server is running at http://localhost:${port}`);
 });

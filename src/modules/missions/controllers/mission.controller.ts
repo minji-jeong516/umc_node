@@ -1,88 +1,61 @@
-import { Request, Response, NextFunction } from "express";
-import { StatusCodes } from "http-status-codes";
-import { challengeMission,listMyChallengingMissions,completeMyMission, } from "../services/mission.service.js";
+import {
+  Controller,
+  Get,
+  Patch,
+  Path,
+  Post,
+  Query,
+  Route,
+  Tags,
+} from "tsoa";
 
-// 미션 도전 API 핸들러
-export const handleChallengeMission = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
-    // missionId 추출 및 숫자 변환
-    const missionId = Number(req.params.missionId);
+import {
+  challengeMission,
+  listMyChallengingMissions,
+  completeMyMission,
+} from "../services/mission.service.js";
 
-    // missionId 유효성 검사
-    if (Number.isNaN(missionId)) {
-      return res.status(StatusCodes.BAD_REQUEST).json({
-        message: "missionId가 올바르지 않습니다.",
-      });
-    }
+import { ApiResponse, success } from "../../../common/responses/response.js";
 
-    // 임시 사용자 ID
+@Route("missions")
+@Tags("Missions")
+export class MissionController extends Controller {
+  // 미션 도전 API
+  @Post("{missionId}/challenge")
+  public async handleChallengeMission(
+    @Path() missionId: number
+  ): Promise<ApiResponse<any>> {
     const userId = 1;
 
-    // 미션 도전 로직 실행
     const result = await challengeMission(userId, missionId);
 
-    // 결과 반환
-    return res.status(StatusCodes.OK).json({
-      result,
-    });
-  } catch (err) {
-    // 에러 처리
-    next(err);
+    return success(result);
   }
-};
-// 내가 도전중인 미션
-export const handleListMyChallengingMissions = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
+
+  // 내가 도전 중인 미션 목록 조회
+  @Get("challenging")
+  public async handleListMyChallengingMissions(
+    @Query() cursor?: number
+  ): Promise<ApiResponse<any>> {
     const userId = 1;
 
-    const cursor =
-      typeof req.query.cursor === "string"
-        ? Number(req.query.cursor)
-        : 0;
-
-    const result = await listMyChallengingMissions(userId, cursor);
-
-    return res.status(StatusCodes.OK).json({
-      result,
-    });
-  } catch (err) {
-    next(err);
-  }
-};
-
-export const handleCompleteMission = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
-    const missionId = Number(req.params.missionId);
-
-    if (Number.isNaN(missionId)) {
-      return res.status(StatusCodes.BAD_REQUEST).json({
-        message: "missionId가 올바르지 않습니다.",
-      });
-    }
-
-    const userId = 1;
-
-    const result = await completeMyMission(
+    const result = await listMyChallengingMissions(
       userId,
-      missionId
+      cursor ?? 0
     );
 
-    return res.status(StatusCodes.OK).json({
-      result,
-    });
-  } catch (err) {
-    next(err);
+    return success(result);
   }
-};
+
+  // 미션 완료 처리
+  @Patch("{missionId}/complete")
+  public async handleCompleteMission(
+    @Path() missionId: number
+  ): Promise<ApiResponse<any>> {
+    const userId = 1;
+
+    const result = await completeMyMission(userId, missionId);
+
+    return success(result);
+  }
+}
