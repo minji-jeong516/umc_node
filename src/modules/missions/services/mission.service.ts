@@ -2,8 +2,10 @@ import {
   findMissionById,
   findUserMission,
   createUserMission,
+  getMyChallengingMissions,
+  completeMission,
 } from "../repositories/mission.repository.js";
-
+import { responseFromMyChallengingMissions } from "../dtos/mission.dto.js";
 export const challengeMission = async (
   userId: number,
   missionId: number
@@ -29,5 +31,33 @@ export const challengeMission = async (
     userMissionId,
     missionId,
     status: "CHALLENGING",
+  };
+};
+// 진행중인 미션
+export const listMyChallengingMissions = async (
+  userId: number,
+  cursor: number
+) => {
+  const userMissions = await getMyChallengingMissions(userId, cursor);
+
+  return responseFromMyChallengingMissions(userMissions);
+};
+// 진행중인 미션을 진행 완료로 바꾸기
+export const completeMyMission = async (
+  userId: number,
+  missionId: number
+) => {
+  const updatedCount = await completeMission(
+    userId,
+    missionId
+  );
+
+  if (updatedCount === 0) {
+    throw new Error("진행 중인 미션이 없습니다.");
+  }
+
+  return {
+    missionId,
+    status: "COMPLETED",
   };
 };
