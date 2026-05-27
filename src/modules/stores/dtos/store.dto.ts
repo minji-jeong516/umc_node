@@ -1,11 +1,7 @@
 export interface CreateStoreRequest {
+  /** 가게 이름 */
   name: string;
+
+  /** 가게 주소 */
   address: string;
 }
-
-export const bodyToStore = (body: CreateStoreRequest) => {
-  return {
-    name: body.name,
-    address: body.address,
-  };
-};
