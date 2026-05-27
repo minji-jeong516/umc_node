@@ -1,6 +1,6 @@
 import { prisma } from "../../../db.config.js";
 
-// 1. User 데이터 삽입
+// User 데이터 삽입
 export const addUser = async (data: any): Promise<number | null> => {
   try {
     // 이미 존재하는 이메일인지 확인
@@ -32,7 +32,7 @@ export const addUser = async (data: any): Promise<number | null> => {
   }
 };
 
-// 2. 사용자 정보 얻기
+// 사용자 정보 얻기
 export const getUser = async (userId: number): Promise<any | null> => {
   try {
     return await prisma.user.findFirst({
@@ -43,7 +43,7 @@ export const getUser = async (userId: number): Promise<any | null> => {
   }
 };
 
-// 3. 음식 선호 카테고리 매핑
+// 음식 선호 카테고리 매핑
 export const setPreference = async (
   userId: number,
   foodCategoryId: number
@@ -73,6 +73,41 @@ export const getUserPreferencesByUserId = async (
       orderBy: {
         foodCategoryId: "asc",
       },
+    });
+  } catch (err) {
+    throw new Error(`오류가 발생했어요: ${err}`);
+  }
+};
+
+// 사용자 정보 수정
+export const updateUserInfo = async (
+  userId: number,
+  data: any
+): Promise<void> => {
+  try {
+    await prisma.user.update({
+      where: { id: userId },
+      data: {
+        name: data.name,
+        gender: data.gender,
+        birth: data.birth ? new Date(data.birth) : undefined,
+        address: data.address,
+        detailAddress: data.detailAddress,
+        phoneNumber: data.phoneNumber,
+      },
+    });
+  } catch (err) {
+    throw new Error(`오류가 발생했어요: ${err}`);
+  }
+};
+
+// 기존 선호 카테고리 삭제
+export const deleteUserPreferences = async (
+  userId: number
+): Promise<void> => {
+  try {
+    await prisma.userFavorCategory.deleteMany({
+      where: { userId },
     });
   } catch (err) {
     throw new Error(`오류가 발생했어요: ${err}`);

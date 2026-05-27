@@ -40,6 +40,30 @@ export interface UserSignUpResponse {
   preferCategory: string[];
 }
 
+// 내 정보 수정 요청 DTO
+export interface UpdateMyInfoRequest {
+  /** 유저 이름 */
+  name?: string;
+
+  /** 성별 */
+  gender?: string;
+
+  /** 생년월일 */
+  birth?: string;
+
+  /** 주소 */
+  address?: string;
+
+  /** 상세 주소 */
+  detailAddress?: string;
+
+  /** 전화번호 */
+  phoneNumber?: string;
+
+  /** 선호 음식 카테고리 ID 배열 */
+  preferences?: number[];
+}
+
 export const responseFromUser = (data: {
   user: any;
   preferences: any[];

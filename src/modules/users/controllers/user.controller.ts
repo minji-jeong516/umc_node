@@ -8,13 +8,14 @@ import {
   Route,
   Tags,
   Response,
+  Patch,
 } from "tsoa";
 
-import { UserSignUpRequest } from "../dtos/user.dto.js";
+import { UserSignUpRequest, UpdateMyInfoRequest} from "../dtos/user.dto.js";
 
-import { userSignUp } from "../services/user.service.js";
+import { userSignUp, updateMyInfo } from "../services/user.service.js";
 
-import { authorizeUser } from "../../../common/middlewares/auth.middleware.js";
+import { authorizeUser, authenticateJWT } from "../../../common/middlewares/auth.middleware.js";
 
 import { Request as ExpressRequest } from "express";
 
@@ -116,5 +117,24 @@ export class UserController extends Controller {
     req.res!.clearCookie("username");
 
     return '로그아웃 완료 (쿠키 삭제). <a href="/api/v1/users/guest">메인으로</a>';
+  }
+    /**
+   * 내 정보 수정 API
+   * @summary 현재 로그인한 사용자의 정보를 수정합니다.
+   */
+  @Patch("me")
+  @Middlewares(authenticateJWT())
+  @Response<ApiResponse<any>>(200, "내 정보 수정 성공")
+  @Response<ApiResponse<null>>(401, "로그인이 필요합니다")
+  public async handleUpdateMyInfo(
+    @Request() req: ExpressRequest,
+
+    @Body() body: UpdateMyInfoRequest
+  ): Promise<ApiResponse<any>> {
+    const userId = (req as any).user.id;
+
+    const result = await updateMyInfo(userId, body);
+
+    return success(result);
   }
 }

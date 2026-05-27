@@ -120,6 +120,44 @@
 				"type": "object",
 				"additionalProperties": false
 			},
+			"UpdateMyInfoRequest": {
+				"properties": {
+					"name": {
+						"type": "string",
+						"description": "유저 이름"
+					},
+					"gender": {
+						"type": "string",
+						"description": "성별"
+					},
+					"birth": {
+						"type": "string",
+						"description": "생년월일"
+					},
+					"address": {
+						"type": "string",
+						"description": "주소"
+					},
+					"detailAddress": {
+						"type": "string",
+						"description": "상세 주소"
+					},
+					"phoneNumber": {
+						"type": "string",
+						"description": "전화번호"
+					},
+					"preferences": {
+						"items": {
+							"type": "number",
+							"format": "double"
+						},
+						"type": "array",
+						"description": "선호 음식 카테고리 ID 배열"
+					}
+				},
+				"type": "object",
+				"additionalProperties": false
+			},
 			"CreateStoreRequest": {
 				"properties": {
 					"name": {
@@ -340,6 +378,50 @@
 				],
 				"security": [],
 				"parameters": []
+			}
+		},
+		"/users/me": {
+			"patch": {
+				"operationId": "HandleUpdateMyInfo",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiResponse_any_"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "로그인이 필요합니다",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiResponse_null_"
+								}
+							}
+						}
+					}
+				},
+				"description": "내 정보 수정 API",
+				"summary": "현재 로그인한 사용자의 정보를 수정합니다.",
+				"tags": [
+					"Users"
+				],
+				"security": [],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/UpdateMyInfoRequest"
+							}
+						}
+					}
+				}
 			}
 		},
 		"/regions/{regionId}/stores": {

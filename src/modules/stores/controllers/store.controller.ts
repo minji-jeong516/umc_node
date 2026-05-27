@@ -6,6 +6,7 @@ import {
   Route,
   Tags,
   Response,
+  Middlewares,
 } from "tsoa";
 
 import { CreateStoreRequest } from "../dtos/store.dto.js";
@@ -17,6 +18,8 @@ import {
   success,
 } from "../../../common/responses/response.js";
 
+import { authenticateJWT } from "../../../common/middlewares/auth.middleware.js";
+
 @Route("regions")
 @Tags("Stores")
 export class StoreController extends Controller {
@@ -25,6 +28,7 @@ export class StoreController extends Controller {
    * @summary 특정 지역에 새로운 가게를 추가합니다.
    */
   @Post("{regionId}/stores")
+  @Middlewares(authenticateJWT())
   @Response<ApiResponse<any>>(200, "가게 추가 성공")
   @Response<ApiResponse<null>>(404, "존재하지 않는 지역")
   @Response<ApiResponse<null>>(400, "잘못된 요청")

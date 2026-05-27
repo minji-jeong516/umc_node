@@ -2,6 +2,8 @@
 import cookieParser from "cookie-parser";
 import morgan from "morgan";
 import dotenv from "dotenv";
+import passport from "passport";
+import { googleStrategy, jwtStrategy } from "./auth.config.js";
 dotenv.config();
 
 import express, {
@@ -21,6 +23,8 @@ import { RegisterRoutes } from "./generated/routes.js";
 
 const app: Express = express();
 const port = process.env.PORT || 3000;
+passport.use(googleStrategy);
+passport.use(jwtStrategy);
 
 // 공통 에러 응답 함수
 app.use((req: Request, res: Response, next: NextFunction) => {
@@ -50,6 +54,7 @@ app.use(express.static("public"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
+app.use(passport.initialize());
 
 // 3. 기본 라우트
 app.get("/", (req: Request, res: Response) => {
@@ -66,9 +71,35 @@ app.use(
   swaggerUi.serve,
   swaggerUi.setup(swaggerFile)
 );
+app.get(
+  "/oauth2/login/google",
+  passport.authenticate("google", { session: false })
+);
+
+app.get(
+  "/oauth2/callback/google",
+  passport.authenticate("google", {
+    session: false,
+    failureRedirect: "/login-failed",
+  }),
+  (req, res) => {
+    res.status(200).json({
+      success: true,
+      tokens: req.user,
+    });
+  }
+);
 
 // 5. TSOA 라우트 등록
 const router = express.Router();
+const isLogin = passport.authenticate("jwt", { session: false });
+
+app.get("/mypage", isLogin, (req, res) => {
+  res.status(200).json({
+    message: "인증 성공!",
+    user: req.user,
+  });
+});
 
 RegisterRoutes(router);
 
